@@ -1,8 +1,61 @@
-/*
+.setlist-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.setlist-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
 
-If your plugin does not need CSS, delete this file.
+.setlist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+}
 
-*/
+.setlist-index {
+  color: var(--text-muted);
+  min-width: 1.5em;
+  text-align: right;
+}
+
+.setlist-title {
+  flex: 1;
+}
+
+.setlist-title.setlist-no-sheet {
+  color: var(--text-warning);
+}
+
+.setlist-key-select {
+  min-width: 4.5em;
+}
+
+.setlist-remove-btn {
+  cursor: pointer;
+}
+
+.setlist-drag-handle {
+  cursor: grab;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+}
+
+.setlist-drag-handle:active {
+  cursor: grabbing;
+}
+
+.sortable-ghost {
+  opacity: 0.4;
+}
+
+.sortable-chosen {
+  background: var(--background-modifier-hover);
+}

@@ -1,7 +1,6 @@
 import { App, TFile, CachedMetadata } from "obsidian";
 
 export const LYRICS_FOLDER = "Lyrics"; // TODO: make those changeable in settings
-export const SHEETS_FOLDER = "Sheets"; // TODO: make those changeable in settings
 
 const CHORDS_PATTERN = /^Chords\s+(.+)$/i;
 
@@ -18,14 +17,6 @@ export interface Song {
   level: string | null;
   language: string | null;
   sheets: SheetOption[];
-}
-
-export async function ensureFolders(app: App): Promise<void> {
-  for (const path of [LYRICS_FOLDER, SHEETS_FOLDER]) {
-    if (!app.vault.getAbstractFileByPath(path)) {
-      await app.vault.createFolder(path);
-    }
-  }
 }
 
 export function parseSong(app: App, file: TFile): Song | null {

@@ -13,9 +13,20 @@ import {
 	SampleSettingTab as MusicSessionPDFSettingTab,
 } from './settings';
 
-import { ensureFolders, getAllSongs } from './session_creator';
+import { getAllSongs } from './session/parser';
+import { SessionModal } from './session/modal';
 
-// Remember to rename these classes and interfaces!
+export const LYRICS_FOLDER = "Lyrics"; // TODO: make those changeable in settings
+export const SHEETS_FOLDER = "Sheets"; // TODO: make those changeable in settings
+export const SESSIONS_FOLDER = "Sessions"; // TODO: make those changeable in settings
+
+async function ensureFolders(app: App): Promise<void> {
+  for (const path of [LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER]) {
+	if (!app.vault.getAbstractFileByPath(path)) {
+	  await app.vault.createFolder(path);
+	}
+  }
+}
 
 export default class MusicSessionPDF extends Plugin {
 	settings!: MusicSessionPDFSettings;
@@ -34,12 +45,12 @@ export default class MusicSessionPDF extends Plugin {
 			},
 		});
 
-
-		// This creates an icon in the left ribbon.
-		/* this.addRibbonIcon('dice', 'Sample', (_evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		}); */
+		// This creates an session icon in the left ribbon.
+		this.addRibbonIcon('notepad-text-dashed', 'Create Music Session', (_evt: MouseEvent) => {
+			new SessionModal(this.app, (entries) => {
+				console.log("Setlist fertig:", entries); 
+			}).open();
+		});
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		/* const statusBarItemEl = this.addStatusBarItem();
