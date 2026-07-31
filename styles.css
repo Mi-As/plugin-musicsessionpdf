@@ -59,3 +59,10 @@
 .sortable-chosen {
   background: var(--background-modifier-hover);
 }
+
+.setlist-confirm-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}

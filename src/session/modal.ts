@@ -1,6 +1,8 @@
 import Sortable from "sortablejs";
 import { App, Modal, Setting, FuzzySuggestModal, setIcon } from "obsidian";
+
 import { Song, SheetOption, getAllSongs } from "./parser";
+import { generateSessionNote } from "./generator";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -20,6 +22,7 @@ function defaultKeyFor(song: Song): string {
   const firstKeyed = song.sheets.find((s) => s.key !== null);
   return firstKeyed?.key ?? "C";
 }
+
 
 class SongPickerModal extends FuzzySuggestModal<Song> {
   constructor(
@@ -50,7 +53,7 @@ export class SessionModal extends Modal {
   private listEl: HTMLElement;
   private sortable: Sortable | undefined;
 
-  constructor(app: App, private onGenerate: (entries: SetlistEntry[]) => void) {
+  constructor(app: App) {
     super(app);
     this.allSongs = getAllSongs(this.app);
   }
@@ -95,8 +98,10 @@ export class SessionModal extends Modal {
       btn
         .setButtonText("Generate")
         .setCta()
-        .onClick(() => {
-          this.onGenerate(this.entries);
+        .onClick(async () => {
+          const file = await generateSessionNote(this.app, this.entries);
+          new Notice(`Session created: ${file.basename}`);
+          await this.app.workspace.getLeaf(false).openFile(file);
           this.close();
         })
     );

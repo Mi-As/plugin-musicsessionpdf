@@ -1,6 +1,5 @@
 import { App, TFile, CachedMetadata } from "obsidian";
-
-export const LYRICS_FOLDER = "Lyrics"; // TODO: make those changeable in settings
+import { LYRICS_FOLDER } from "../constants";
 
 const CHORDS_PATTERN = /^Chords\s+(.+)$/i;
 

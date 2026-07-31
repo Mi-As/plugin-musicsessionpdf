@@ -1,10 +1,7 @@
 import {
-	Editor,
-	MarkdownView,
-	MarkdownFileInfo,
-	Modal,
 	Notice,
 	Plugin,
+	App
 } from 'obsidian';
 
 import {
@@ -16,9 +13,7 @@ import {
 import { getAllSongs } from './session/parser';
 import { SessionModal } from './session/modal';
 
-export const LYRICS_FOLDER = "Lyrics"; // TODO: make those changeable in settings
-export const SHEETS_FOLDER = "Sheets"; // TODO: make those changeable in settings
-export const SESSIONS_FOLDER = "Sessions"; // TODO: make those changeable in settings
+import { LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER } from './constants';
 
 async function ensureFolders(app: App): Promise<void> {
   for (const path of [LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER]) {
@@ -47,55 +42,8 @@ export default class MusicSessionPDF extends Plugin {
 
 		// This creates an session icon in the left ribbon.
 		this.addRibbonIcon('notepad-text-dashed', 'Create Music Session', (_evt: MouseEvent) => {
-			new SessionModal(this.app, (entries) => {
-				console.log("Setlist fertig:", entries); 
-			}).open();
+			new SessionModal(this.app).open();
 		});
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		/* const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text'); */
-
-		// This adds a simple command that can be triggered anywhere
-		/* this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			},
-		}); */
-		// This adds an editor command that can perform some operation on the current editor instance
-		/* this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (
-				editor: Editor,
-				_ctx: MarkdownView | MarkdownFileInfo,
-			) => {
-				editor.replaceSelection('Sample editor command');
-			},
-		}); */
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		/* this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-				return false;
-			},
-		}); */
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new MusicSessionPDFSettingTab(this.app, this));
@@ -106,10 +54,6 @@ export default class MusicSessionPDF extends Plugin {
 			new Notice('Click');
 		});
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		/* this.registerInterval(
-			window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000),
-		); */
 	}
 
 	onunload() {}
@@ -127,14 +71,3 @@ export default class MusicSessionPDF extends Plugin {
 	}
 }
 
-/* class SampleModal extends Modal {
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
-} */
