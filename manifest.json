@@ -2,10 +2,9 @@
 	"id": "music-session-pdfs",
 	"name": "Music Session PDFs",
 	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
+	"minAppVersion": "1.4.0",
+	"description": "Lets create a music session and generates all files necessary for musician and audience.",
 	"author": "Mi-As",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/Mi-As",
 	"isDesktopOnly": false
 }
