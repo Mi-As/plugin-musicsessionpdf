@@ -1,8 +1,13 @@
 import {
 	Notice,
 	Plugin,
-	App
+	App,
+	TFile
 } from 'obsidian';
+
+import { generateLyricsPdf } from './pdfmaker';
+import { parseSessionEntries } from './session/parser';
+import { SessionModal } from './session/modal';
 
 import {
 	DEFAULT_SETTINGS,
@@ -10,13 +15,10 @@ import {
 	SampleSettingTab as MusicSessionPDFSettingTab,
 } from './settings';
 
-import { getAllSongs } from './session/parser';
-import { SessionModal } from './session/modal';
-
-import { LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER } from './constants';
+import { LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER, SESSIONS_PDF_FOLDER } from './constants';
 
 async function ensureFolders(app: App): Promise<void> {
-  for (const path of [LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER]) {
+  for (const path of [LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER, SESSIONS_PDF_FOLDER]) {
 	if (!app.vault.getAbstractFileByPath(path)) {
 	  await app.vault.createFolder(path);
 	}
@@ -31,15 +33,6 @@ export default class MusicSessionPDF extends Plugin {
 
 		await ensureFolders(this.app);
 
-		this.addCommand({
-			id: "log-all-songs",
-			name: "Log all songs (debug)",
-			callback: () => {
-				const songs = getAllSongs(this.app);
-				console.log(songs);
-			},
-		});
-
 		// This creates an session icon in the left ribbon.
 		this.addRibbonIcon('notepad-text-dashed', 'Create Music Session', (_evt: MouseEvent) => {
 			new SessionModal(this.app).open();
@@ -48,11 +41,28 @@ export default class MusicSessionPDF extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new MusicSessionPDFSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(activeDocument, 'click', (_evt: MouseEvent) => {
-			new Notice('Click');
-		});
+		this.registerEvent(
+			this.app.workspace.on("file-menu", (menu, file) => {
+				if (!(file instanceof TFile)) return;
+				if (!file.path.startsWith(SESSIONS_FOLDER + "/")) return;
+				if (file.extension !== "md") return;
+
+				menu.addItem((item) => {
+				item
+					.setTitle("Generate lyrics PDF")
+					.setIcon("file-text")
+					.onClick(async () => {
+					const entries = await parseSessionEntries(this.app, file);
+					if (entries.length === 0) {
+						new Notice("No songs found in this session file.");
+						return;
+					}
+					const pdfFile = await generateLyricsPdf(this.app, entries, file.basename);
+					new Notice(`Lyrics PDF created: ${pdfFile.basename}`);
+					});
+				});
+			})
+		);
 
 	}
 

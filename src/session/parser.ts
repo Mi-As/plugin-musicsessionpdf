@@ -1,7 +1,9 @@
-import { App, TFile, CachedMetadata } from "obsidian";
+import { App, TFile, CachedMetadata, getFrontMatterInfo } from "obsidian";
 import { LYRICS_FOLDER } from "../constants";
 
 const CHORDS_PATTERN = /^Chords\s+(.+)$/i;
+
+const SESSION_LINE_PATTERN = /^- \[\[(.+?)\]\] key: (.+)$/;
 
 export interface SheetOption {
   label: string;         // e.g. "Chord Numbers" or "G"
@@ -16,6 +18,11 @@ export interface Song {
   level: string | null;
   language: string | null;
   sheets: SheetOption[];
+}
+
+export interface SessionEntry {
+  file: TFile;
+  key: string;
 }
 
 export function parseSong(app: App, file: TFile): Song | null {
@@ -66,4 +73,26 @@ export function getAllSongs(app: App): Song[] {
         .filter((f) => f.path.startsWith(LYRICS_FOLDER + "/"))
         .map((f) => parseSong(app, f))
         .filter((s): s is Song => s !== null);
+}
+
+export async function parseSessionEntries(
+  app: App,
+  sessionFile: TFile
+): Promise<SessionEntry[]> {
+  const raw = await app.vault.cachedRead(sessionFile);
+  const info = getFrontMatterInfo(raw);
+  const body = raw.slice(info.contentStart);
+
+  const entries: SessionEntry[] = [];
+  for (const line of body.split("\n")) {
+    const match = line.match(SESSION_LINE_PATTERN);
+    if (!match) continue;
+
+    const [, linkText, key] = match;
+    const target = app.metadataCache.getFirstLinkpathDest(linkText, sessionFile.path);
+    if (!target) continue; // linked song was renamed/deleted
+
+    entries.push({ file: target, key: key.trim() });
+  }
+  return entries;
 }

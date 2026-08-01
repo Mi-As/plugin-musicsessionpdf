@@ -26,6 +26,7 @@
 		"typescript-eslint": "^8.59.1"
 	},
 	"dependencies": {
+		"pdf-lib": "^1.17.1",
 		"sortablejs": "^1.15.7"
 	}
 }
