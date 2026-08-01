@@ -39,12 +39,24 @@ async function findAvailablePath(app: App, baseName: string): Promise<string> {
   return path;
 }
 
+export async function linkPdfInSession(
+  app: App,
+  sessionFile: TFile,
+  key: "lyrics_pdf" | "sheet_pdf",
+  pdfFile: TFile
+): Promise<void> {
+  await app.fileManager.processFrontMatter(sessionFile, (fm) => {
+    fm[key] = `[[${pdfFile.path}]]`;
+  });
+}
+
 export async function generateSessionNote(
   app: App,
-  entries: SetlistEntry[]
+  entries: SetlistEntry[],
+  customName?: string
 ): Promise<TFile> {
   const date = new Date();
-  const baseName = `Session ${formatDate(date)}`;
+  const baseName = customName || `Session ${formatDate(date)}`;
   const path = await findAvailablePath(app, baseName);
   const content = buildSessionContent(entries, date);
   return app.vault.create(path, content);

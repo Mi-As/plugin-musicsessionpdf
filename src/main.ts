@@ -8,6 +8,7 @@ import {
 import { generateLyricsPdf, generateSheetPdf } from './pdfmaker';
 import { parseSessionEntries } from './session/parser';
 import { SessionModal } from './session/modal';
+import { linkPdfInSession } from './session/generator';
 
 import {
 	DEFAULT_SETTINGS,
@@ -59,6 +60,7 @@ export default class MusicSessionPDF extends Plugin {
 						return;
 					}
 					const pdfFile = await generateLyricsPdf(this.app, entries, file.basename);
+					await linkPdfInSession(this.app, file, "lyrics_pdf", pdfFile);
 					new Notice(`Lyrics PDF created: ${pdfFile.basename}`);
 					});
 				});
@@ -75,6 +77,7 @@ export default class MusicSessionPDF extends Plugin {
 					}
 					const pdfFile = await generateSheetPdf(this.app, entries, file.basename);
 					if (pdfFile) {
+						await linkPdfInSession(this.app, file, "sheet_pdf", pdfFile);
 						new Notice(`Sheet PDF created: ${pdfFile.basename}`);
 					}
 					});

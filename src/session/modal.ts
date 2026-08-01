@@ -1,5 +1,5 @@
 import Sortable from "sortablejs";
-import { App, Modal, Setting, FuzzySuggestModal, setIcon } from "obsidian";
+import { App, Modal, Setting, FuzzySuggestModal, setIcon, TextComponent, Notice } from "obsidian";
 
 import { Song, SheetOption, getAllSongs, resolveSheet } from "./parser";
 import { generateSessionNote } from "./generator";
@@ -52,6 +52,7 @@ export class SessionModal extends Modal {
   private entries: SetlistEntry[] = [];
   private listEl: HTMLElement;
   private sortable: Sortable | undefined;
+   private nameInput: TextComponent;
 
   constructor(app: App) {
     super(app);
@@ -61,6 +62,14 @@ export class SessionModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.createEl("h2", { text: "Create a set list" });
+
+    new Setting(contentEl)
+      .setName("Session name")
+      .setDesc("Leave empty to use today's date")
+      .addText((text) => {
+        text.setPlaceholder(`Session ${new Date().toISOString().slice(0, 10)}`);
+        this.nameInput = text;
+    });
 
     new Setting(contentEl)
       .setName("Search song database")
@@ -78,7 +87,7 @@ export class SessionModal extends Modal {
             this.renderList();
           }).open();
         })
-      );
+    );
 
     this.listEl = contentEl.createDiv({ cls: "setlist-container" });
 
@@ -99,7 +108,7 @@ export class SessionModal extends Modal {
         .setButtonText("Generate")
         .setCta()
         .onClick(async () => {
-          const file = await generateSessionNote(this.app, this.entries);
+          const file = await generateSessionNote(this.app, this.entries, this.nameInput.getValue());
           new Notice(`Session created: ${file.basename}`);
           await this.app.workspace.getLeaf(false).openFile(file);
           this.close();
