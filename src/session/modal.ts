@@ -1,7 +1,7 @@
 import Sortable from "sortablejs";
 import { App, Modal, Setting, FuzzySuggestModal, setIcon } from "obsidian";
 
-import { Song, SheetOption, getAllSongs } from "./parser";
+import { Song, SheetOption, getAllSongs, resolveSheet } from "./parser";
 import { generateSessionNote } from "./generator";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -131,14 +131,18 @@ export class SessionModal extends Modal {
 
         const select = row.createEl("select", { cls: "setlist-key-select" });
         KEYS.forEach((key) => {
-        const opt = select.createEl("option", { text: key, value: key });
-        if (entry.key === key) opt.selected = true;
+          const isPreferred = key === entry.song.preferredKey;
+          const opt = select.createEl("option", {
+            text: isPreferred ? `${key} ★` : key,
+            value: key,
+          });
+          if (entry.key === key) opt.selected = true;
         });
 
         const updateHighlight = () => {
-        const match = findSheetForKey(entry.song, entry.key);
-        titleEl.toggleClass("setlist-no-sheet", !match);
-        };
+			  const match = resolveSheet(entry.song.sheets, entry.key);
+			  titleEl.toggleClass("setlist-no-sheet", !match);
+		    };
         updateHighlight();
 
         select.onchange = () => {

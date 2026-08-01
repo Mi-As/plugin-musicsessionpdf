@@ -5,7 +5,7 @@ import {
 	TFile
 } from 'obsidian';
 
-import { generateLyricsPdf } from './pdfmaker';
+import { generateLyricsPdf, generateSheetPdf } from './pdfmaker';
 import { parseSessionEntries } from './session/parser';
 import { SessionModal } from './session/modal';
 
@@ -33,6 +33,7 @@ export default class MusicSessionPDF extends Plugin {
 
 		await ensureFolders(this.app);
 
+
 		// This creates an session icon in the left ribbon.
 		this.addRibbonIcon('notepad-text-dashed', 'Create Music Session', (_evt: MouseEvent) => {
 			new SessionModal(this.app).open();
@@ -59,6 +60,23 @@ export default class MusicSessionPDF extends Plugin {
 					}
 					const pdfFile = await generateLyricsPdf(this.app, entries, file.basename);
 					new Notice(`Lyrics PDF created: ${pdfFile.basename}`);
+					});
+				});
+
+				menu.addItem((item) => {
+				item
+					.setTitle("Generate sheet PDF")
+					.setIcon("music")
+					.onClick(async () => {
+					const entries = await parseSessionEntries(this.app, file);
+					if (entries.length === 0) {
+						new Notice("No songs found in this session file.");
+						return;
+					}
+					const pdfFile = await generateSheetPdf(this.app, entries, file.basename);
+					if (pdfFile) {
+						new Notice(`Sheet PDF created: ${pdfFile.basename}`);
+					}
 					});
 				});
 			})

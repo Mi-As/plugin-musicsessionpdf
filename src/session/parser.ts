@@ -3,7 +3,7 @@ import { LYRICS_FOLDER } from "../constants";
 
 const CHORDS_PATTERN = /^Chords\s+(.+)$/i;
 
-const SESSION_LINE_PATTERN = /^- \[\[(.+?)\]\] key: (.+)$/;
+const SESSION_LINE_PATTERN = /^- \[\[(.+?)\]\] key: (\S+)(?: sheet: \[\[(.+?)\]\])?$/;
 
 export interface SheetOption {
   label: string;         // e.g. "Chord Numbers" or "G"
@@ -23,6 +23,7 @@ export interface Song {
 export interface SessionEntry {
   file: TFile;
   key: string;
+  sheetFile: TFile | null;
 }
 
 export function parseSong(app: App, file: TFile): Song | null {
@@ -67,6 +68,16 @@ export function parseSong(app: App, file: TFile): Song | null {
     }
 };
 
+export function resolveSheet(sheets: SheetOption[], key: string): SheetOption | null {
+  const exact = sheets.find((s) => s.key === key);
+  if (exact) return exact;
+
+  const numbers = sheets.find((s) => /^Chord Numbers$/i.test(s.label));
+  if (numbers) return numbers;
+
+  return null;
+}
+
 export function getAllSongs(app: App): Song[] {
     return app.vault
         .getMarkdownFiles()
@@ -88,11 +99,15 @@ export async function parseSessionEntries(
     const match = line.match(SESSION_LINE_PATTERN);
     if (!match) continue;
 
-    const [, linkText, key] = match;
+    const [, linkText, key, sheetLinkText] = match;
     const target = app.metadataCache.getFirstLinkpathDest(linkText, sessionFile.path);
-    if (!target) continue; // linked song was renamed/deleted
+    if (!target) continue;
 
-    entries.push({ file: target, key: key.trim() });
+    const sheetFile = sheetLinkText
+      ? app.metadataCache.getFirstLinkpathDest(sheetLinkText, sessionFile.path)
+      : null;
+
+    entries.push({ file: target, key: key.trim(), sheetFile: sheetFile ?? null });
   }
   return entries;
 }

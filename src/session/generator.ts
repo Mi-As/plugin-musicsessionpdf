@@ -1,8 +1,9 @@
 import { App, TFile } from "obsidian";
 import { SESSIONS_FOLDER } from "../constants";
+import { Song, resolveSheet } from "./parser";
 
 export interface SetlistEntry {
-  song: { file: TFile; title: string };
+  song: Song;
   key: string;
 }
 
@@ -14,11 +15,16 @@ function buildSessionContent(entries: SetlistEntry[], date: Date): string {
   const lines = [
     "---",
     `date: ${formatDate(date)}`,
+    "generated: true",
     "---",
     "",
     "> [!warning] This file is auto-generated. Do not edit — changes will be lost on regeneration.",
     "",
-    ...entries.map((e) => `- [[${e.song.file.basename}]] key: ${e.key}`),
+    ...entries.map((e) => {
+      const sheet = resolveSheet(e.song.sheets, e.key);
+      const sheetPart = sheet ? ` sheet: [[${sheet.file.path}]]` : "";
+      return `- [[${e.song.file.path}]] key: ${e.key}${sheetPart}`;
+    }),
   ];
   return lines.join("\n");
 }

@@ -1,4 +1,4 @@
-import { App, TFile, getFrontMatterInfo } from "obsidian";
+import { App, TFile, getFrontMatterInfo, Notice } from "obsidian";
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from "pdf-lib";
 
 import { SESSIONS_PDF_FOLDER } from "./constants";
@@ -82,6 +82,48 @@ export async function generateLyricsPdf(
   const bytes = await pdfDoc.save();
   const path = `${SESSIONS_PDF_FOLDER}/${fileNameBase} - Lyrics.pdf`;
 
+  const existing = app.vault.getAbstractFileByPath(path);
+  if (existing instanceof TFile) {
+    await app.vault.modifyBinary(existing, bytes);
+    return existing;
+  }
+  return app.vault.createBinary(path, bytes);
+}
+
+export async function generateSheetPdf(
+  app: App,
+  entries: SessionEntry[],
+  fileNameBase: string
+): Promise<TFile | null> {
+  const outDoc = await PDFDocument.create();
+  const missing: string[] = [];
+
+  for (const entry of entries) {
+    if (!entry.sheetFile) {
+      missing.push(entry.file.basename);
+      continue;
+    }
+    const bytes = await app.vault.readBinary(entry.sheetFile);
+    const srcDoc = await PDFDocument.load(bytes);
+    const pages = await outDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+    pages.forEach((p) => outDoc.addPage(p));
+  }
+
+  if (missing.length > 0) {
+    new Notice(
+      `No sheet found for: ${missing.join(", ")} — PDF generated without ${
+        missing.length === 1 ? "it" : "them"
+      }.`
+    );
+  }
+
+  if (outDoc.getPageCount() === 0) {
+    new Notice("No sheets available at all — PDF not created.");
+    return null;
+  }
+
+  const bytes = await outDoc.save();
+  const path = `${SESSIONS_PDF_FOLDER}/${fileNameBase} - Sheets.pdf`;
   const existing = app.vault.getAbstractFileByPath(path);
   if (existing instanceof TFile) {
     await app.vault.modifyBinary(existing, bytes);
