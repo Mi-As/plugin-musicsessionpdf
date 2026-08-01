@@ -1,7 +1,6 @@
 import { App, TFile, getFrontMatterInfo, Notice } from "obsidian";
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from "pdf-lib";
 
-import { SESSIONS_PDF_FOLDER } from "./constants";
 import { SessionEntry } from "./session/parser";
 
 // "Mobile" page size (narrow portrait, roughly phone aspect ratio)
@@ -41,7 +40,8 @@ function wrapLine(text: string, font: PDFFont, size: number, maxWidth: number): 
 export async function generateLyricsPdf(
   app: App,
   entries: SessionEntry[],
-  fileNameBase: string
+  fileNameBase: string,
+  pdfFolder: string
 ): Promise<TFile> {
   const pdfDoc = await PDFDocument.create();
   const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -80,7 +80,7 @@ export async function generateLyricsPdf(
   }
 
   const bytes = await pdfDoc.save();
-  const path = `${SESSIONS_PDF_FOLDER}/${fileNameBase} - Lyrics.pdf`;
+  const path = `${pdfFolder}/${fileNameBase} - Lyrics.pdf`;
 
   const existing = app.vault.getAbstractFileByPath(path);
   if (existing instanceof TFile) {
@@ -93,7 +93,8 @@ export async function generateLyricsPdf(
 export async function generateSheetPdf(
   app: App,
   entries: SessionEntry[],
-  fileNameBase: string
+  fileNameBase: string,
+  pdfFolder: string
 ): Promise<TFile | null> {
   const outDoc = await PDFDocument.create();
   const missing: string[] = [];
@@ -123,7 +124,7 @@ export async function generateSheetPdf(
   }
 
   const bytes = await outDoc.save();
-  const path = `${SESSIONS_PDF_FOLDER}/${fileNameBase} - Sheets.pdf`;
+  const path = `${pdfFolder}/${fileNameBase} - Sheets.pdf`;
   const existing = app.vault.getAbstractFileByPath(path);
   if (existing instanceof TFile) {
     await app.vault.modifyBinary(existing, bytes);

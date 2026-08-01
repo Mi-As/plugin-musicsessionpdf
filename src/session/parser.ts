@@ -1,5 +1,4 @@
 import { App, TFile, CachedMetadata, getFrontMatterInfo } from "obsidian";
-import { LYRICS_FOLDER } from "../constants";
 
 const CHORDS_PATTERN = /^Chords\s+(.+)$/i;
 
@@ -78,12 +77,12 @@ export function resolveSheet(sheets: SheetOption[], key: string): SheetOption | 
   return null;
 }
 
-export function getAllSongs(app: App): Song[] {
-    return app.vault
-        .getMarkdownFiles()
-        .filter((f) => f.path.startsWith(LYRICS_FOLDER + "/"))
-        .map((f) => parseSong(app, f))
-        .filter((s): s is Song => s !== null);
+export function getAllSongs(app: App, lyricsFolder: string): Song[] {
+  return app.vault
+    .getMarkdownFiles()
+    .filter((f) => f.path.startsWith(lyricsFolder + "/"))
+    .map((f) => parseSong(app, f))
+    .filter((s): s is Song => s !== null);
 }
 
 export async function parseSessionEntries(

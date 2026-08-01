@@ -6,23 +6,34 @@ import {
 } from 'obsidian';
 
 import { generateLyricsPdf, generateSheetPdf } from './pdfmaker';
-import { parseSessionEntries } from './session/parser';
+import { parseSessionEntries, getAllSongs } from './session/parser';
 import { SessionModal } from './session/modal';
 import { linkPdfInSession } from './session/generator';
+
+import { sessionsPdfFolder } from './settings';
 
 import {
 	DEFAULT_SETTINGS,
 	MyPluginSettings as MusicSessionPDFSettings,
-	SampleSettingTab as MusicSessionPDFSettingTab,
+	MusicPDFSettingTab as MusicSessionPDFSettingTab,
 } from './settings';
 
-import { LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER, SESSIONS_PDF_FOLDER } from './constants';
-
-async function ensureFolders(app: App): Promise<void> {
-  for (const path of [LYRICS_FOLDER, SHEETS_FOLDER, SESSIONS_FOLDER, SESSIONS_PDF_FOLDER]) {
-	if (!app.vault.getAbstractFileByPath(path)) {
-	  await app.vault.createFolder(path);
-	}
+async function ensureFolders(app: App, settings: MusicSessionPDFSettings): Promise<void> {
+  const paths = [
+    settings.lyricsFolder,
+    settings.sheetsFolder,
+    settings.sessionsFolder,
+    sessionsPdfFolder(settings),
+  ];
+  for (const path of paths) {
+    if (app.vault.getAbstractFileByPath(path)) continue;
+    try {
+      await app.vault.createFolder(path);
+    } catch (e) {
+      if (!(e instanceof Error && e.message.includes("already exists"))) {
+        throw e;
+      }
+    }
   }
 }
 
@@ -31,61 +42,67 @@ export default class MusicSessionPDF extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+		await ensureFolders(this.app, this.settings);
 
-		await ensureFolders(this.app);
-
-
-		// This creates an session icon in the left ribbon.
-		this.addRibbonIcon('notepad-text-dashed', 'Create Music Session', (_evt: MouseEvent) => {
-			new SessionModal(this.app).open();
+		this.addCommand({
+			id: "log-all-songs",
+			name: "Log all songs (debug)",
+			callback: () => {
+			const songs = getAllSongs(this.app, this.settings.lyricsFolder);
+			console.log(songs);
+			},
 		});
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new MusicSessionPDFSettingTab(this.app, this));
+		this.addRibbonIcon("notepad-text-dashed", "Create Music Session", () => {
+			new SessionModal(this.app, this.settings).open();
+		});
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
-				if (!(file instanceof TFile)) return;
-				if (!file.path.startsWith(SESSIONS_FOLDER + "/")) return;
-				if (file.extension !== "md") return;
+			if (!(file instanceof TFile)) return;
+			if (!file.path.startsWith(this.settings.sessionsFolder + "/")) return;
+			if (file.extension !== "md") return;
 
-				menu.addItem((item) => {
+			const pdfFolder = sessionsPdfFolder(this.settings);
+
+			menu.addItem((item) => {
 				item
-					.setTitle("Generate lyrics PDF")
-					.setIcon("file-text")
-					.onClick(async () => {
+				.setTitle("Generate lyrics PDF")
+				.setIcon("file-text")
+				.onClick(async () => {
 					const entries = await parseSessionEntries(this.app, file);
 					if (entries.length === 0) {
-						new Notice("No songs found in this session file.");
-						return;
+					new Notice("No songs found in this session file.");
+					return;
 					}
-					const pdfFile = await generateLyricsPdf(this.app, entries, file.basename);
+					const pdfFile = await generateLyricsPdf(this.app, entries, file.basename, pdfFolder);
 					await linkPdfInSession(this.app, file, "lyrics_pdf", pdfFile);
 					new Notice(`Lyrics PDF created: ${pdfFile.basename}`);
-					});
 				});
+			});
 
-				menu.addItem((item) => {
+			menu.addItem((item) => {
 				item
-					.setTitle("Generate sheet PDF")
-					.setIcon("music")
-					.onClick(async () => {
+				.setTitle("Generate sheet PDF")
+				.setIcon("music")
+				.onClick(async () => {
 					const entries = await parseSessionEntries(this.app, file);
 					if (entries.length === 0) {
-						new Notice("No songs found in this session file.");
-						return;
+					new Notice("No songs found in this session file.");
+					return;
 					}
-					const pdfFile = await generateSheetPdf(this.app, entries, file.basename);
+					const pdfFile = await generateSheetPdf(this.app, entries, file.basename, pdfFolder);
 					if (pdfFile) {
-						await linkPdfInSession(this.app, file, "sheet_pdf", pdfFile);
-						new Notice(`Sheet PDF created: ${pdfFile.basename}`);
+					await linkPdfInSession(this.app, file, "sheet_pdf", pdfFile);
+					new Notice(`Sheet PDF created: ${pdfFile.basename}`);
 					}
-					});
 				});
+			});
 			})
 		);
 
-	}
+		this.addSettingTab(new MusicSessionPDFSettingTab(this.app, this));
+		}
 
 	onunload() {}
 

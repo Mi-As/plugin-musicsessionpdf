@@ -1,5 +1,4 @@
 import { App, TFile } from "obsidian";
-import { SESSIONS_FOLDER } from "../constants";
 import { Song, resolveSheet } from "./parser";
 
 export interface SetlistEntry {
@@ -29,11 +28,15 @@ function buildSessionContent(entries: SetlistEntry[], date: Date): string {
   return lines.join("\n");
 }
 
-async function findAvailablePath(app: App, baseName: string): Promise<string> {
-  let path = `${SESSIONS_FOLDER}/${baseName}.md`;
+async function findAvailablePath(
+  app: App,
+  sessionsFolder: string,
+  baseName: string
+): Promise<string> {
+  let path = `${sessionsFolder}/${baseName}.md`;
   let suffix = 2;
   while (app.vault.getAbstractFileByPath(path)) {
-    path = `${SESSIONS_FOLDER}/${baseName} ${suffix}.md`;
+    path = `${sessionsFolder}/${baseName} ${suffix}.md`;
     suffix++;
   }
   return path;
@@ -53,11 +56,12 @@ export async function linkPdfInSession(
 export async function generateSessionNote(
   app: App,
   entries: SetlistEntry[],
+  sessionsFolder: string,
   customName?: string
 ): Promise<TFile> {
   const date = new Date();
   const baseName = customName || `Session ${formatDate(date)}`;
-  const path = await findAvailablePath(app, baseName);
+  const path = await findAvailablePath(app, sessionsFolder, baseName);
   const content = buildSessionContent(entries, date);
   return app.vault.create(path, content);
 }

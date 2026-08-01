@@ -4,6 +4,8 @@ import { App, Modal, Setting, FuzzySuggestModal, setIcon, TextComponent, Notice 
 import { Song, SheetOption, getAllSongs, resolveSheet } from "./parser";
 import { generateSessionNote } from "./generator";
 
+import { MusicPDFSettingTab } from "../settings";
+
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 interface SetlistEntry {
@@ -52,11 +54,11 @@ export class SessionModal extends Modal {
   private entries: SetlistEntry[] = [];
   private listEl: HTMLElement;
   private sortable: Sortable | undefined;
-   private nameInput: TextComponent;
+  private nameInput: TextComponent;
 
-  constructor(app: App) {
+  constructor(app: App, private settings: MusicPDFSettingTab) {
     super(app);
-    this.allSongs = getAllSongs(this.app);
+    this.allSongs = getAllSongs(this.app, this.settings.lyricsFolder);
   }
 
   onOpen() {
@@ -108,7 +110,12 @@ export class SessionModal extends Modal {
         .setButtonText("Generate")
         .setCta()
         .onClick(async () => {
-          const file = await generateSessionNote(this.app, this.entries, this.nameInput.getValue());
+          const file = await generateSessionNote(
+          this.app,
+          this.entries,
+          this.settings.sessionsFolder,
+          this.nameInput.getValue()
+        );
           new Notice(`Session created: ${file.basename}`);
           await this.app.workspace.getLeaf(false).openFile(file);
           this.close();

@@ -1,5 +1,4 @@
 // constants.ts
-export const LYRICS_FOLDER = "Lyrics";
-export const SHEETS_FOLDER = "Sheets";
-export const SESSIONS_FOLDER = "Sessions";
-export const SESSIONS_PDF_FOLDER = `${SESSIONS_FOLDER}/PDFs`;
+export const DEFAULT_LYRICS_FOLDER = "Lyrics";
+export const DEFAULT_SHEETS_FOLDER = "Sheets";
+export const DEFAULT_SESSIONS_FOLDER = "Sessions";
