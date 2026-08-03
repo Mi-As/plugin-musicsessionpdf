@@ -2,7 +2,7 @@
 	"id": "music-session-pdfs",
 	"name": "Music Session PDFs",
 	"version": "1.0.0",
-	"minAppVersion": "1.4.0",
+	"minAppVersion": "1.5.7",
 	"description": "Lets create a music session and generates all files necessary for musician and audience.",
 	"author": "Mi-As",
 	"authorUrl": "https://github.com/Mi-As",

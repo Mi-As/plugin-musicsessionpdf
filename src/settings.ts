@@ -6,23 +6,23 @@ import {
   DEFAULT_SESSIONS_FOLDER,
 } from "./constants";
 
-export interface MyPluginSettings {
+export interface MusicSessionPDFSettings {
   lyricsFolder: string;
   sheetsFolder: string;
   sessionsFolder: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: MusicSessionPDFSettings = {
   lyricsFolder: DEFAULT_LYRICS_FOLDER,
   sheetsFolder: DEFAULT_SHEETS_FOLDER,
   sessionsFolder: DEFAULT_SESSIONS_FOLDER,
 };
 
-export function sessionsPdfFolder(settings: MyPluginSettings): string {
+export function sessionsPdfFolder(settings: MusicSessionPDFSettings): string {
   return `${settings.sessionsFolder}/PDFs`;
 }
 
-export class MusicPDFSettingTab extends PluginSettingTab {
+export class MusicSessionPDFSettingTab extends PluginSettingTab {
   plugin: MusicSessionPDF;
 
   constructor(app: App, plugin: MusicSessionPDF) {
@@ -36,7 +36,7 @@ export class MusicPDFSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Lyrics folder")
-      .setDesc("Folder containing your song notes")
+      .setDesc("Folder containing your sheet pdfs")
       .addText((text) =>
         text
           .setValue(this.plugin.settings.lyricsFolder)
@@ -48,7 +48,7 @@ export class MusicPDFSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Sheets folder")
-      .setDesc("Folder containing your sheet PDFs")
+      .setDesc("Folder containing your sheet pdfs")
       .addText((text) =>
         text
           .setValue(this.plugin.settings.sheetsFolder)
@@ -60,7 +60,7 @@ export class MusicPDFSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Sessions folder")
-      .setDesc("Folder where generated session notes and PDFs are stored")
+      .setDesc("Folder where generated session notes and pdfs are stored")
       .addText((text) =>
         text
           .setValue(this.plugin.settings.sessionsFolder)

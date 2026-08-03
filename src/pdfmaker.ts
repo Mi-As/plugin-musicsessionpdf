@@ -37,6 +37,10 @@ function wrapLine(text: string, font: PDFFont, size: number, maxWidth: number): 
   return lines;
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+
 export async function generateLyricsPdf(
   app: App,
   entries: SessionEntry[],
@@ -80,14 +84,15 @@ export async function generateLyricsPdf(
   }
 
   const bytes = await pdfDoc.save();
+  const buffer = toArrayBuffer(bytes);
   const path = `${pdfFolder}/${fileNameBase} - Lyrics.pdf`;
 
   const existing = app.vault.getAbstractFileByPath(path);
   if (existing instanceof TFile) {
-    await app.vault.modifyBinary(existing, bytes);
+    await app.vault.modifyBinary(existing, buffer);
     return existing;
   }
-  return app.vault.createBinary(path, bytes);
+  return app.vault.createBinary(path, buffer);
 }
 
 export async function generateSheetPdf(
@@ -124,11 +129,13 @@ export async function generateSheetPdf(
   }
 
   const bytes = await outDoc.save();
+  const buffer = toArrayBuffer(bytes);
+
   const path = `${pdfFolder}/${fileNameBase} - Sheets.pdf`;
   const existing = app.vault.getAbstractFileByPath(path);
   if (existing instanceof TFile) {
-    await app.vault.modifyBinary(existing, bytes);
+    await app.vault.modifyBinary(existing, buffer);
     return existing;
   }
-  return app.vault.createBinary(path, bytes);
+  return app.vault.createBinary(path, buffer);
 }

@@ -29,7 +29,7 @@ export function parseSong(app: App, file: TFile): Song | null {
     const cache: CachedMetadata | null = app.metadataCache.getFileCache(file);
     if (!cache?.frontmatter) return null;
 
-    const fm = cache.frontmatter;
+    const fm = cache.frontmatter as Record<string, unknown>;
 
     const genere = fm["genere"] as string[] | undefined;
     if (genere && !genere.includes("worship")) return null;

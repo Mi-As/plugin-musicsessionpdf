@@ -1,20 +1,16 @@
 import Sortable from "sortablejs";
 import { App, Modal, Setting, FuzzySuggestModal, setIcon, TextComponent, Notice } from "obsidian";
 
-import { Song, SheetOption, getAllSongs, resolveSheet } from "./parser";
+import { Song, getAllSongs, resolveSheet } from "./parser";
 import { generateSessionNote } from "./generator";
 
-import { MusicPDFSettingTab } from "../settings";
+import { MusicSessionPDFSettings } from "../settings";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 interface SetlistEntry {
   song: Song;
   key: string;
-}
-
-function findSheetForKey(song: Song, key: string): SheetOption | undefined {
-  return song.sheets.find((s) => s.key === key);
 }
 
 function defaultKeyFor(song: Song): string {
@@ -52,11 +48,10 @@ class SongPickerModal extends FuzzySuggestModal<Song> {
 export class SessionModal extends Modal {
   private allSongs: Song[];
   private entries: SetlistEntry[] = [];
-  private listEl: HTMLElement;
-  private sortable: Sortable | undefined;
-  private nameInput: TextComponent;
+  private listEl!: HTMLElement;
+  private nameInput!: TextComponent;
 
-  constructor(app: App, private settings: MusicPDFSettingTab) {
+  constructor(app: App, private settings: MusicSessionPDFSettings) {
     super(app);
     this.allSongs = getAllSongs(this.app, this.settings.lyricsFolder);
   }
@@ -76,7 +71,7 @@ export class SessionModal extends Modal {
     new Setting(contentEl)
       .setName("Search song database")
       .addButton((btn) =>
-        btn.setButtonText("+ Choose Song ").onClick(() => {
+        btn.setButtonText("+ choose song ").onClick(() => {
           const alreadyChosen = new Set(
             this.entries.map((e) => e.song.file.path)
           );

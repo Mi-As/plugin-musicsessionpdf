@@ -6,7 +6,7 @@ import {
 } from 'obsidian';
 
 import { generateLyricsPdf, generateSheetPdf } from './pdfmaker';
-import { parseSessionEntries, getAllSongs } from './session/parser';
+import { parseSessionEntries } from './session/parser';
 import { SessionModal } from './session/modal';
 import { linkPdfInSession } from './session/generator';
 
@@ -14,8 +14,8 @@ import { sessionsPdfFolder } from './settings';
 
 import {
 	DEFAULT_SETTINGS,
-	MyPluginSettings as MusicSessionPDFSettings,
-	MusicPDFSettingTab as MusicSessionPDFSettingTab,
+	MusicSessionPDFSettings,
+	MusicSessionPDFSettingTab,
 } from './settings';
 
 async function ensureFolders(app: App, settings: MusicSessionPDFSettings): Promise<void> {
@@ -44,16 +44,7 @@ export default class MusicSessionPDF extends Plugin {
 		await this.loadSettings();
 		await ensureFolders(this.app, this.settings);
 
-		this.addCommand({
-			id: "log-all-songs",
-			name: "Log all songs (debug)",
-			callback: () => {
-			const songs = getAllSongs(this.app, this.settings.lyricsFolder);
-			console.log(songs);
-			},
-		});
-
-		this.addRibbonIcon("notepad-text-dashed", "Create Music Session", () => {
+		this.addRibbonIcon("notepad-text-dashed", "Create music session", () => {
 			new SessionModal(this.app, this.settings).open();
 		});
 

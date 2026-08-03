@@ -48,7 +48,7 @@ export async function linkPdfInSession(
   key: "lyrics_pdf" | "sheet_pdf",
   pdfFile: TFile
 ): Promise<void> {
-  await app.fileManager.processFrontMatter(sessionFile, (fm) => {
+  await app.fileManager.processFrontMatter(sessionFile, (fm: Record<string, unknown>) => {
     fm[key] = `[[${pdfFile.path}]]`;
   });
 }
