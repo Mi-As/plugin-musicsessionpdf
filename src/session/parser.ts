@@ -25,6 +25,10 @@ export interface SessionEntry {
   sheetFile: TFile | null;
 }
 
+function asString(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
 export function parseSong(app: App, file: TFile): Song | null {
     const cache: CachedMetadata | null = app.metadataCache.getFileCache(file);
     if (!cache?.frontmatter) return null;
@@ -60,9 +64,9 @@ export function parseSong(app: App, file: TFile): Song | null {
     return {
         file: file,
         title: file.basename,
-        preferredKey: fm["preferred key"] ?? null,
-        level: fm["level"] ?? null,
-        language: fm["language"] ?? null,
+        preferredKey: asString(fm["preferred key"]),
+        level: asString(fm["level"]),
+        language: asString(fm["language"]),
         sheets: sheets,
     }
 };
@@ -99,6 +103,7 @@ export async function parseSessionEntries(
     if (!match) continue;
 
     const [, linkText, key, sheetLinkText] = match;
+    if (!linkText || !key) continue;
     const target = app.metadataCache.getFirstLinkpathDest(linkText, sessionFile.path);
     if (!target) continue;
 

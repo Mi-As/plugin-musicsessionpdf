@@ -50,6 +50,7 @@ export class SessionModal extends Modal {
   private entries: SetlistEntry[] = [];
   private listEl!: HTMLElement;
   private nameInput!: TextComponent;
+  private sortable: Sortable | undefined;
 
   constructor(app: App, private settings: MusicSessionPDFSettings) {
     super(app);
@@ -94,6 +95,7 @@ export class SessionModal extends Modal {
       onEnd: (evt) => {
         if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
         const [moved] = this.entries.splice(evt.oldIndex, 1);
+        if (!moved) return;
         this.entries.splice(evt.newIndex, 0, moved);
       },
     });
