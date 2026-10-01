@@ -1,17 +1,12 @@
 import Sortable from "sortablejs";
-import { App, Modal, Setting, FuzzySuggestModal, setIcon, TextComponent, Notice } from "obsidian";
+import { App, Modal, Setting, FuzzySuggestModal, setIcon, TextComponent, Notice, } from "obsidian";
 
 import { Song, getAllSongs, resolveSheet } from "./parser";
-import { generateSessionNote } from "./generator";
+import { generateSessionNote, updateSessionNote, SetlistEntry } from "./generator";
 
 import { MusicSessionPDFSettings } from "../settings";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-interface SetlistEntry {
-  song: Song;
-  key: string;
-}
 
 function defaultKeyFor(song: Song): string {
   if (song.preferredKey && KEYS.includes(song.preferredKey)) {
@@ -47,27 +42,37 @@ class SongPickerModal extends FuzzySuggestModal<Song> {
 
 export class SessionModal extends Modal {
   private allSongs: Song[];
-  private entries: SetlistEntry[] = [];
+  private entries: SetlistEntry[];
   private listEl!: HTMLElement;
   private nameInput!: TextComponent;
   private sortable: Sortable | undefined;
 
-  constructor(app: App, private settings: MusicSessionPDFSettings) {
+  constructor(
+    app: App,
+    private settings: MusicSessionPDFSettings,
+    private existingFile?: TFile,
+    initialEntries: SetlistEntry[] = []
+  ) {
     super(app);
     this.allSongs = getAllSongs(this.app, this.settings.lyricsFolder);
+    this.entries = [...initialEntries];
   }
 
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("h2", { text: "Create a set list" });
-
-    new Setting(contentEl)
-      .setName("Session name")
-      .setDesc("Leave empty to use today's date")
-      .addText((text) => {
-        text.setPlaceholder(`Session ${new Date().toISOString().slice(0, 10)}`);
-        this.nameInput = text;
+    contentEl.createEl("h2", {
+      text: this.existingFile ? "Edit set list" : "Create a set list",
     });
+
+    if (!this.existingFile) {
+      new Setting(contentEl)
+        .setName("Session name")
+        .setDesc("Leave empty to use today's date")
+        .addText((text) => {
+          text.setPlaceholder(`Session ${new Date().toISOString().slice(0, 10)}`);
+          this.nameInput = text;
+        });
+    }
 
     new Setting(contentEl)
       .setName("Search song database")
@@ -104,21 +109,27 @@ export class SessionModal extends Modal {
 
     new Setting(contentEl).addButton((btn) =>
       btn
-        .setButtonText("Generate")
+        .setButtonText(this.existingFile ? "Save" : "Generate")
         .setCta()
         .onClick(async () => {
-          const file = await generateSessionNote(
-          this.app,
-          this.entries,
-          this.settings.sessionsFolder,
-          this.nameInput.getValue()
-        );
-          new Notice(`Session created: ${file.basename}`);
-          await this.app.workspace.getLeaf(false).openFile(file);
+          if (this.existingFile) {
+            await updateSessionNote(this.app, this.existingFile, this.entries);
+            new Notice(`Session updated: ${this.existingFile.basename}`);
+            await this.app.workspace.getLeaf(false).openFile(this.existingFile);
+          } else {
+            const file = await generateSessionNote(
+              this.app,
+              this.entries,
+              this.settings.sessionsFolder,
+              this.nameInput.getValue()
+            );
+            new Notice(`Session created: ${file.basename}`);
+            await this.app.workspace.getLeaf(false).openFile(file);
+          }
           this.close();
         })
-    );
-  }
+      );
+    }
 
   private renderList() {
     this.listEl.empty();

@@ -1,4 +1,4 @@
-import { App, TFile } from "obsidian";
+import { App, TFile, getFrontMatterInfo } from "obsidian";
 import { Song, resolveSheet } from "./parser";
 
 export interface SetlistEntry {
@@ -10,22 +10,33 @@ function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
-function buildSessionContent(entries: SetlistEntry[], date: Date): string {
+function buildBody(entries: SetlistEntry[]): string {
   const lines = [
-    "---",
-    `date: ${formatDate(date)}`,
-    "generated: true",
-    "---",
-    "",
     "> [!warning] This file is auto-generated. Do not edit — changes will be lost on regeneration.",
     "",
     ...entries.map((e) => {
       const sheet = resolveSheet(e.song.sheets, e.key);
       const sheetPart = sheet ? ` sheet: [[${sheet.file.path}]]` : "";
-      return `- [[${e.song.file.path}]] key: ${e.key}${sheetPart}`;
+      return `- [[${e.song.file.basename}]] key: ${e.key}${sheetPart}`;
     }),
   ];
   return lines.join("\n");
+}
+
+function buildSessionContent(entries: SetlistEntry[], date: Date): string {
+  const frontmatter = ["---", `date: ${formatDate(date)}`, "generated: true", "---", ""];
+  return frontmatter.join("\n") + "\n" + buildBody(entries);
+}
+
+export async function updateSessionNote(
+  app: App,
+  sessionFile: TFile,
+  entries: SetlistEntry[]
+): Promise<void> {
+  const raw = await app.vault.read(sessionFile);
+  const info = getFrontMatterInfo(raw);
+  const frontmatterBlock = raw.slice(0, info.contentStart);
+  await app.vault.modify(sessionFile, frontmatterBlock + buildBody(entries) + "\n");
 }
 
 async function findAvailablePath(

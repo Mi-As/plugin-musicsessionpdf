@@ -6,11 +6,12 @@ import {
 } from 'obsidian';
 
 import { generateLyricsPdf, generateSheetPdf } from './pdfmaker';
-import { parseSessionEntries } from './session/parser';
+import { parseSessionEntries, parseSong } from './session/parser';
 import { SessionModal } from './session/modal';
-import { linkPdfInSession } from './session/generator';
+import { linkPdfInSession, SetlistEntry } from './session/generator';
 
 import { sessionsPdfFolder } from './settings';
+
 
 import {
 	DEFAULT_SETTINGS,
@@ -87,6 +88,34 @@ export default class MusicSessionPDF extends Plugin {
 					await linkPdfInSession(this.app, file, "sheet_pdf", pdfFile);
 					new Notice(`Sheet PDF created: ${pdfFile.basename}`);
 					}
+				});
+			});
+
+			menu.addItem((item) => {
+			item
+				.setTitle("Edit music session")
+				.setIcon("list-music")
+				.onClick(async () => {
+				const sessionEntries = await parseSessionEntries(this.app, file);
+				const setlistEntries: SetlistEntry[] = [];
+				const missing: string[] = [];
+
+				for (const se of sessionEntries) {
+					const song = parseSong(this.app, se.file);
+					if (!song) {
+					missing.push(se.file.basename);
+					continue;
+					}
+					setlistEntries.push({ song, key: se.key });
+				}
+
+				if (missing.length > 0) {
+					new Notice(
+					`Could not load from database: ${missing.join(", ")} (note missing or no longer tagged as worship)`
+					);
+				}
+
+				new SessionModal(this.app, this.settings, file, setlistEntries).open();
 				});
 			});
 			})
