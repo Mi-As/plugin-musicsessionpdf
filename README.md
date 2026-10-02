@@ -47,14 +47,14 @@ Folders are created automatically on plugin load if missing.
 ## Usage
 
 1. Click the ribbon icon (or run **Create set list** from the command palette) to open the setlist builder.
-![create music session png](doc/images/create_music_session.png)
-2. Click **Generate** to save a session note.
-3. Right-click the session note in the file explorer:
+<img src="doc/images/create_music_session.png" alt="create music session png" width="400"/>
+
+3. Click **Generate** to save a session note.
+4. Right-click the session note in the file explorer:
    - **Generate lyrics PDF** — one page per song, sized for reading on a phone.
    - **Generate sheet PDF** — merges the original sheet-music PDFs for each song's chosen key (falling back to "Chord Numbers" if the exact key isn't available; songs with no sheet at all are skipped with a notice, the rest of the PDF is still generated).
    - **Edit music session** - edit songs and key from a existing setlist
-
-![menu ribbon png](doc/images/menu_ribbon.png)
+     
 
 Both generated PDFs are saved to `Sessions/PDFs/` and linked back into the session note's frontmatter (`lyrics_pdf`, `sheet_pdf`).
 
@@ -88,5 +88,4 @@ This plugin isn't published to the Community Plugin store, so install it via [BR
 
 ## Known limitations
 
-- Renaming a configured folder in Settings does not move existing files — move them manually in Obsidian first.
 - Sheet-music PDFs are merged as-is (original pages copied); the plugin does not transpose chords.
