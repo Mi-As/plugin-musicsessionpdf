@@ -61,7 +61,7 @@ export class SessionModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.createEl("h2", {
-      text: this.existingFile ? "Edit set list" : "Create a set list",
+      text: this.existingFile ? "Edit music session" : "Create a music session",
     });
 
     if (!this.existingFile) {

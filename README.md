@@ -47,13 +47,14 @@ Folders are created automatically on plugin load if missing.
 ## Usage
 
 1. Click the ribbon icon (or run **Create set list** from the command palette) to open the setlist builder.
-2. Optionally give the session a custom name (defaults to `Session <today's date>`).
-3. Click **+ Choose song** to search and add songs from your database.
-4. Drag rows by the handle to reorder. Pick a key per song from the dropdown — your preferred key is marked with a ★, and a song's title turns orange if no matching sheet (or "Chord Numbers" fallback) exists for the selected key.
-5. Click **Generate** to save a session note.
-6. Right-click the session note in the file explorer:
+![create music session png](doc/images/create_music_session.png)
+2. Click **Generate** to save a session note.
+3. Right-click the session note in the file explorer:
    - **Generate lyrics PDF** — one page per song, sized for reading on a phone.
    - **Generate sheet PDF** — merges the original sheet-music PDFs for each song's chosen key (falling back to "Chord Numbers" if the exact key isn't available; songs with no sheet at all are skipped with a notice, the rest of the PDF is still generated).
+   - **Edit music session** - edit songs and key from a existing setlist
+
+![menu ribbon png](doc/images/menu_ribbon.png)
 
 Both generated PDFs are saved to `Sessions/PDFs/` and linked back into the session note's frontmatter (`lyrics_pdf`, `sheet_pdf`).
 
