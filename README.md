@@ -72,8 +72,8 @@ sheet_pdf: "[[Sessions/PDFs/Session 2026-08-01 - Sheets.pdf]]"
 
 > [!warning] This file is auto-generated. Do not edit — changes will be lost on regeneration.
 
-- [[Blut von Jesus]] key: F# sheet: [[Sheets/Blut von Jesus.pdf]]
-- [[Anker in der Zeit]] key: F sheet: [[Sheets/Anker in der Zeit-chords-F.pdf]]
+- [[Great are you Lord]] key: D sheet: [[Sheets/Great are you Lord.pdf]]
+- [[Way Maker]] key: C sheet: [[Sheets/Way Maker-chords-C.pdf]]
 ```
 
 The resolved sheet per song is frozen at generation time — regenerating the setlist re-resolves it, but editing the song database afterward won't silently change a past session.
