@@ -17,6 +17,13 @@ async function getSongBody(app: App, file: TFile): Promise<string> {
   return raw.slice(info.contentStart).trim();
 }
 
+function toSafeText(text: string, font: PDFFont): string {
+  const supported = new Set(font.getCharacterSet());
+  return Array.from(text.normalize("NFC"))
+    .map((ch) => (supported.has(ch.codePointAt(0) ?? 0) ? ch : "?"))
+    .join("");
+}
+
 function wrapLine(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   if (text.trim() === "") return [""]; // keep blank lines for verse spacing
 
@@ -77,7 +84,8 @@ export async function generateLyricsPdf(
 
     const body = await getSongBody(app, entry.file);
     for (const rawLine of body.split("\n")) {
-      for (const line of wrapLine(rawLine, bodyFont, BODY_SIZE, maxWidth)) {
+      const safeLine = toSafeText(rawLine, bodyFont);
+      for (const line of wrapLine(safeLine, bodyFont, BODY_SIZE, maxWidth)) {
         drawLine(line, bodyFont, BODY_SIZE);
       }
     }
